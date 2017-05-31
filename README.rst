@@ -10,8 +10,33 @@ guide, but it does attempt to cover several common errors with style.
 To make errors easier to visually locate, 5 characters of context are
 sometimes given, depending on the detected error.
 
+
+Installation
+------------
+
+Clone this repository and run::
+
+    make install
+
+or install from Pypi::
+
+    pip3 install pyapa
+
+
+Information
+-----------
+
+Pypi: https://pypi.python.org/pypi/pyapa/
+
+Github: https://github.com/keeferrourke/pyapa
+
+Contact: https://krourke.org/contact
+
+License: ISC License
+
+
 pyapa.ApaCheck object class
--------------------------
+---------------------------
 
 This class documents regular expressions to match style errors.
 
@@ -20,7 +45,7 @@ and stores them in the `ApaCheck.Matches` list for easy access.
 
 
 pyapa.ApaMatch object class
--------------------------
+---------------------------
 
 This class contains the following members:
 
