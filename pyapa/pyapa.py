@@ -42,7 +42,21 @@ class ApaMatch:
             for s in self.suggestions:
                 print("Suggestion: " + s)
 
-        return
+    def sprint(self):
+        string = ''
+        if self.start and self.end:
+            string += ("Match from " + str(self.start) + " to " + str(self.end)
+                       + " for:\n")
+            if self.target:
+                string += ("Target: " + self.target + "\n")
+        if self.feedback:
+            string += ("Feedback: " + self.feedback + "\n")
+        if self.suggestions:
+            for s in self.suggestions:
+                string += ("Suggestion: " + s + "\n")
+
+        return string
+
 
 
 # defines patterns for common errors and builds an array of ApaMatch objects
