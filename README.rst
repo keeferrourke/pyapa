@@ -45,25 +45,25 @@ Example usage
 
 From the interpreter:
 
->>> import pyapa
->>> a = pyapa.ApaCheck()
->>> text = u'Papaya are delicious fruit, it was concluded (Author, et
-    al. 2017).'
->>> a.match(text)
-[<pyapa.ApaMatch object at 0x000000000000>]
->>> len(a.Matches)
-1
->>> a.Matches[0].print()
-Match from 48 to 66 for:
-Target: uthor, et al. 2017
-Feedback: Do not put a comma before 'et al.'
-Suggestion: uthor et al. 2017
+    >>> import pyapa
+    >>> a = pyapa.ApaCheck()
+    >>> text = u'Papaya are delicious fruit, it was concluded (Author, et
+        al. 2017).'
+    >>> a.match(text)
+    [<pyapa.ApaMatch object at 0x000000000000>]
+    >>> len(a.Matches)
+    1
+    >>> a.Matches[0].print()
+    Match from 48 to 66 for:
+    Target: uthor, et al. 2017
+    Feedback: Do not put a comma before 'et al.'
+    Suggestion: uthor et al. 2017
 
 
 Calling the module itself:
 
-python3 -m pyapa -i input.txt
-python3 -m pyapa -h
-Usage:
-pyapa [-h] [--version] [-o OUTPUT_FILE] -i INPUT_FILE
+    python3 -m pyapa -i input.txt
+    python3 -m pyapa -h
+    Usage:
+    pyapa [-h] [--version] [-o OUTPUT_FILE] -i INPUT_FILE
 
