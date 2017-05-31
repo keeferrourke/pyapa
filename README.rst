@@ -24,20 +24,20 @@ pyapa.ApaMatch object class
 
 This class contains the following members:
 
- * `ApaMatch.feedback` a unicode string intended to hold a brief
-   explanation of an associated error
- * `ApaMatch.end` the position of the character in a text which marks
-   the end of the target character span
- * `ApaMatch.start` the position of the character in a text which marks
-   the beginning of the target character span
- * `ApaMatch.target` the matching string that contains an error
- * `ApaMatch.suggestions` a list of suggested replacement strings; at
-   this time, the list is only ever one element long
+* `ApaMatch.feedback` a unicode string intended to hold a brief
+  explanation of an associated error
+* `ApaMatch.end` the position of the character in a text which marks
+  the end of the target character span
+* `ApaMatch.start` the position of the character in a text which marks
+  the beginning of the target character span
+* `ApaMatch.target` the matching string that contains an error
+* `ApaMatch.suggestions` a list of suggested replacement strings; at
+  this time, the list is only ever one element long
 
 There are also two helper functions to make printing these objects easy:
 
- * `ApaMatch.print()` prints the object to stdout
- * `ApaMatch.sprint()` builds a string containing information about the object
+* `ApaMatch.print()` prints the object to stdout
+* `ApaMatch.sprint()` builds a string containing information about the object
 
 
 Example usage
@@ -61,7 +61,8 @@ Suggestion: uthor et al. 2017
 
 
 Calling the module itself:
-.. code-block:: sh
+
+::
 
     python3 -m pyapa -i input.txt
     python3 -m pyapa -h
