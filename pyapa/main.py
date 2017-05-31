@@ -34,6 +34,7 @@ def print_usage():
 def f_open(filename):
     f_in = open(filename, 'r', encoding='utf-8')
     text = f_in.read()
+    f_in.close()
 
     return text
 

@@ -70,10 +70,9 @@ Example usage
 
 From the interpreter:
 
->>> import pyapa
+>>> from pyapa import pyapa
 >>> a = pyapa.ApaCheck()
->>> text = u'Papaya are delicious fruit, it was concluded (Author, et
-    al. 2017).'
+>>> text = u'Papaya are delicious fruit, it was concluded (Author, et al. 2017).'
 >>> a.match(text)
 [<pyapa.ApaMatch object at 0x000000000000>]
 >>> len(a.Matches)
