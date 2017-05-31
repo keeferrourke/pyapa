@@ -43,7 +43,7 @@ def f_write(filename, matches):
         output += m.sprint()
         output += '\n'
 
-    f_out = open(filename, 'r')
+    f_out = open(filename, 'w')
     f_out.write(output)
     f_out.close()
 
@@ -56,6 +56,7 @@ def apacheck(text):
 def main(argv):
     infile = ''
     outfile = ''
+    version = ''
 
     try:
         opts, args = getopt.getopt(argv, 'o:i:vh', ['output=', 'input=',
@@ -88,7 +89,9 @@ def main(argv):
         else:
             assert False, 'unhandled option'
 
-    if not infile:
+    if not infile and version:
+        sys.exit(0)
+    elif not infile and not version:
         sys.stderr.write('Error. Input file is required.\n')
         print_usage()
         sys.exit(2)
