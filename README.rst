@@ -74,14 +74,14 @@ From the interpreter:
 >>> a = pyapa.ApaCheck()
 >>> text = u'Papaya are delicious fruit, it was concluded (Author, et al. 2017).'
 >>> a.match(text)
-[<pyapa.ApaMatch object at 0x000000000000>]
+[<pyapa.pyapa.ApaMatch object at 0x000000000000>]
 >>> len(a.Matches)
 1
 >>> a.Matches[0].print()
-Match from 48 to 66 for:
-Target: uthor, et al. 2017
+Match from 46 to 65 for:
+Target: Author, et al. 2017
 Feedback: Do not put a comma before 'et al.'
-Suggestion: uthor et al. 2017
+Suggestion: Author et al. 2017
 
 
 Calling the module itself:
