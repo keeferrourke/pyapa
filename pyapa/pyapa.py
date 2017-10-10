@@ -24,11 +24,12 @@ import re
 
 class ApaMatch:
     def __init__(self):
-        self.feedback = ""
-        self.end = 0
-        self.start = 0
-        self.target = ""
-        self.suggestions = []
+        self.feedback = ""      # feedback string; explains error
+        self.see = ""           # reference string; point to external style guide
+        self.end = 0            # end character position for target
+        self.start = 0          # start character position for target
+        self.target = ""        # target substring that contains error with context
+        self.suggestions = []   # list of replacement suggestions, if any
 
     def print(self):
         if self.start and self.end:
@@ -93,30 +94,27 @@ class ApaCheck:
                                (\w+))                 # context
                            """, re.X)
     # multiple references should be combined with a semicolon
-    joinrefstyle = re.compile(r"""(\([^)]+            # 1st open ref paren
-                                  (\b\d\d\d\d|n\.d\.) # 1st year
-                                  \)                  # 1st close ref paren
-                                  [ ,]*               # separation
-                                  \([^)]+             # 2nd open ref paren
-                                  (\b\d\d\d\d|n\.d\.) # 2nd year
-                                  \))                 # 2nd close ref paren
-                              """, re.X)
+    joinrefstyle = re.compile(
+        r"\([^)]+(\b\d\d\d\d|n\.d\.)\)([\s+,;]*\([^)]+(\b\d\d\d\d|n\.d\.)\))+"
+    )
+
     # place the period after an in-text citation
     refbeforedot = re.compile(r"(\.\s+\([^)]+(\b\d\d\d\d|n\.d\.)\))")
 
-    # patterns to be exempted
-    url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
-                     + r"([\w.\b]*[\w\b])")
-    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
-
-    # if author names are in brackets for an in-text citation, use an & to
-    # separate them
-    textciteamp = re.compile(r"(\([^)]+\sand\s[^)]+\s(\b\d\d\d\d|n\.d\.)\))")
     #if only the year is in brackets for an in-text citation, use "and" to
     #separate author names
     #intextciteand   = re.compile(r"""(.{0,5}           # context
     #                                .{0,5})            # context
     #                             """, re.X)
+
+    # if author names are in brackets for an in-text citation, use an & to
+    # separate them
+    textciteamp = re.compile(r"(\([^)]+\sand\s[^)]+\s(\b\d\d\d\d|n\.d\.)\))")
+
+    # patterns to be exempted
+    url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
+                     + r"([\w.\b]*[\w\b])")
+    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
     # init ApaCheck object with an optional context length
     def __init__(self):
@@ -147,8 +145,7 @@ class ApaCheck:
             suggestion = ""
 
             if matchList[i].re == self.yearletter:
-                newMatch.feedback = (u"Letters that appear immediately "
-                                     "after a year should be lowercase.")
+                newMatch.feedback = (u"Letters that appear immediately after a year should be lowercase.")
                 suggestion = newMatch.target.lower()
 
             elif matchList[i].re == self.etalcomma:
@@ -156,22 +153,19 @@ class ApaCheck:
                 suggestion = re.sub(r", ", " ", newMatch.target)
 
             elif matchList[i].re == self.refdatedot:
-                newMatch.feedback = (u"References go at the end of sentences;"
-                                     "end your sentence after the reference.")
+                newMatch.feedback = (u"References go at the end of sentences; end your sentence after the reference.")
                 s = newMatch.target
                 suggestion = re.sub(r"\)\s", r").", newMatch.target)
 
             elif matchList[i].re == self.reftitlecase:
-                newMatch.feedback = (u"If this is an article title, consider "
-                                     "using lowercase.")
+                newMatch.feedback = (u"If this is an article title, consider using lowercase.")
                 s = newMatch.target.lower()
                 s = s[4:]
                 suggestion = newMatch.target[:4]
                 suggestion += s
 
             elif matchList[i].re == self.stopspace:
-                newMatch.feedback = (u"Every period should be followed "
-                                     "by a space.")
+                newMatch.feedback = (u"Every period should be followed by a space.")
                 suggestion = re.sub(r"\.", r". ", newMatch.target)
 
                 # double check that this isn't a false positive
@@ -184,22 +178,19 @@ class ApaCheck:
                         break
 
             elif matchList[i].re == self.joinrefstyle:
-                newMatch.feedback = (u"Multiple parentheticals should "
-                                     "combined using a semicolon.")
-                suggestion = re.sub(r"\)\s+\(", r"; ", newMatch.target)
+                newMatch.feedback = (u"Multiple parentheticals should be combined using a semicolon.")
+                newMatch.see = "http://www.apastyle.org/learn/faqs/references-in-parentheses.aspx"
+                suggestion = re.sub(r"\)[\s+,;]*\(", r"; ", newMatch.target)
 
             elif matchList[i].re == self.refbeforedot:
-                newMatch.feedback = (u"In text citations belong as part "
-                                     "of the preceeding sentence. Place "
-                                     "the period after the citation.")
+                newMatch.feedback = (u"In text citations belong as part of the preceeding sentence. Place the period after the citation.")
                 s = newMatch.target[:2]
                 suggestion = newMatch.target[2:]
                 suggestion += s
 
             elif matchList[i].re == self.textciteamp:
                 print("Match")
-                newMatch.feedback = (u"Use & to separate bracketed author "
-                                     "names.")
+                newMatch.feedback = (u"Use & to separate bracketed author names.")
                 suggestion = re.sub(r"and", r"&", newMatch.target)
 
 
