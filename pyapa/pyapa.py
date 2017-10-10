@@ -39,6 +39,8 @@ class ApaMatch:
                 print("Target: " + self.target)
         if self.feedback:
             print("Feedback: " + self.feedback)
+        if self.see:
+            print("See: " + self.see)
         if self.suggestions:
             for s in self.suggestions:
                 print("Suggestion: " + s)
@@ -52,6 +54,8 @@ class ApaMatch:
                 string += ("Target: " + self.target + "\n")
         if self.feedback:
             string += ("Feedback: " + self.feedback + "\n")
+        if self.see:
+            string += ("See: " + self.see + "\n")
         if self.suggestions:
             for s in self.suggestions:
                 string += ("Suggestion: " + s + "\n")
