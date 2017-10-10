@@ -11,6 +11,8 @@ dist:
 	python3 setup.py bdist_wheel
 clean:
 	- rm -r build/ dist/ *.egg-info
+	- find . -type f -name "*.pyc" -exec rm {} \;
+	- find . -type d -name "__pycache__" -exec rm -r {} \;
 
 
 

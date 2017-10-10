@@ -52,7 +52,7 @@ This class contains the following members:
 * `ApaMatch.feedback` a unicode string intended to hold a brief
   explanation of an associated error
 * `ApaMatch.see` a URL string intended to hold an external reference to an APA
-   Style guide
+  Style guide
 * `ApaMatch.end` the position of the character in a text which marks
   the end of the target character span
 * `ApaMatch.start` the position of the character in a text which marks
