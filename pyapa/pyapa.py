@@ -118,8 +118,9 @@ class ApaCheck:
     # patterns to be exempted
     url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
                      + r"([\w.\b]*[\w\b])")
-    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
-
+    # Needs multiline in order to incorporate SoS (^) and EoS ($) in a text block
+    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", re.MULTILINE)
+    
     # init ApaCheck object with an optional context length
     def __init__(self):
         self.Matches = []
