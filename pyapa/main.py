@@ -70,7 +70,7 @@ def main(argv):
     if not opts:
         sys.stderr.write('Error. No arguments provided.')
         print_usage()
-        sys_exit(2)
+        sys.exit(2)
 
     for opt, arg in opts:
         if opt in ('--output', '-o'):
