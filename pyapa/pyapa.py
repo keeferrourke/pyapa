@@ -36,14 +36,14 @@ class ApaMatch:
             print("Match from " + str(self.start) + " to " + str(self.end)
                   + " for:")
             if self.target:
-                print("Target: " + self.target)
+                print("Target: " + self.target.strip())
         if self.feedback:
-            print("Feedback: " + self.feedback)
+            print("Feedback: " + self.feedback.strip())
         if self.see:
             print("See: " + self.see)
         if self.suggestions:
             for s in self.suggestions:
-                print("Suggestion: " + s)
+                print("Suggestion: " + s.strip())
 
     def sprint(self):
         string = ''
