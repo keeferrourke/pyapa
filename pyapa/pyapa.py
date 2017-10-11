@@ -67,12 +67,12 @@ class ApaMatch:
 # defines patterns for common errors and builds an array of ApaMatch objects
 class ApaCheck:
     # pattern for year, YYYY or n.d.
-    YEAR = r"(\d\d\d\d|n\.d\.)"
+    YEAR = r"(\b\d{4}|n\.d\.)"
 
     # set up regex matching for common mistakes with one word of context
 
     # letters that appear immediately after a year should be lowercase
-    yearletter = re.compile(r"(\b\d\d\d\d[A-Z][),])")
+    yearletter = re.compile(r"(\b\d{4}[A-Z][),])")
 
     # do not put a comma before 'et al.'
     etalcomma = re.compile(r"((\w+), et al\..{0,5})")
@@ -99,11 +99,11 @@ class ApaCheck:
                            """, re.X)
     # multiple references should be combined with a semicolon
     joinrefstyle = re.compile(
-        r"\([^)]+(\b\d\d\d\d|n\.d\.)\)([\s+,;]*\([^)]+(\b\d\d\d\d|n\.d\.)\))+"
+        r"\([^)]+"+YEAR+"\)([\s+,;]*\([^)]+"+YEAR+"\))+"
     )
 
     # place the period after an in-text citation
-    refbeforedot = re.compile(r"(\.\s+\([^)]+(\b\d\d\d\d|n\.d\.)\))")
+    refbeforedot = re.compile(r"(\.\s+\([^)]+"+YEAR+"\))")
 
     #if only the year is in brackets for an in-text citation, use "and" to
     #separate author names
@@ -120,7 +120,15 @@ class ApaCheck:
                      + r"([\w.\b]*[\w\b])")
     # Needs multiline in order to incorporate SoS (^) and EoS ($) in a text block
     email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", re.MULTILINE)
-    
+
+    # Hans & Yorke (2006) contradict ...
+    ampintextref = re.compile(r"[\w\s]+\s&\s[\w\s]+\("+YEAR+"\)")
+
+    # if author names are in brackets for an in-text citation, use an & to
+    # separate them
+    # ... literature (Hans and Yorke, 2006).
+    andinbracketref = re.compile(r"\([^)]+\sand\s[^)]+\s"+YEAR+"\)")
+
     # init ApaCheck object with an optional context length
     def __init__(self):
         self.Matches = []
@@ -136,6 +144,8 @@ class ApaCheck:
         matchList += list(re.finditer(self.stopspace, text))
         matchList += list(re.finditer(self.joinrefstyle, text))
         matchList += list(re.finditer(self.refbeforedot, text))
+        matchList += list(re.finditer(self.ampintextref, text))
+        matchList += list(re.finditer(self.andinbracketref, text))
 
         unmatchList = list(re.finditer(self.url, text))
         unmatchList += list(re.finditer(self.email, text))
