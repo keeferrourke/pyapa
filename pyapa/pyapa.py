@@ -155,6 +155,7 @@ class ApaCheck:
 
             elif matchList[i].re == self.etalcomma:
                 newMatch.feedback = (u"Do not put a comma before 'et al.'")
+                newMatch.see = "http://academicguides.waldenu.edu/writingcenter/apa/citations/etal"
                 suggestion = re.sub(r", ", " ", newMatch.target)
 
             elif matchList[i].re == self.refdatedot:
