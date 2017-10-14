@@ -36,14 +36,14 @@ class ApaMatch:
             print("Match from " + str(self.start) + " to " + str(self.end)
                   + " for:")
             if self.target:
-                print("Target: " + self.target)
+                print("Target: " + self.target.strip())
         if self.feedback:
-            print("Feedback: " + self.feedback)
+            print("Feedback: " + self.feedback.strip())
         if self.see:
             print("See: " + self.see)
         if self.suggestions:
             for s in self.suggestions:
-                print("Suggestion: " + s)
+                print("Suggestion: " + s.strip())
 
     def sprint(self):
         string = ''
@@ -67,16 +67,18 @@ class ApaMatch:
 # defines patterns for common errors and builds an array of ApaMatch objects
 class ApaCheck:
     # pattern for year, YYYY or n.d.
-    YEAR = r"(\d\d\d\d|n\.d\.)"
+    YEAR = r"(\b\d{4}|n\.d\.)"
 
     # set up regex matching for common mistakes with one word of context
 
     # letters that appear immediately after a year should be lowercase
-    yearletter = re.compile(r"(\b\d\d\d\d[A-Z][),])")
+    yearletter = re.compile(r"(\b\d{4}[A-Z][),])")
 
     # do not put a comma before 'et al.'
     etalcomma = re.compile(r"((\w+), et al\..{0,5})")
 
+    # TODO: Incorrect to assume that any reference should be followed by a period
+    '''
     # put a period after the date in a reference
     refdatedot = re.compile(r"""((\w+\s+)                  # context
                                 (                          # start group
@@ -86,40 +88,42 @@ class ApaCheck:
                                 [^.]                       # error
                                 ))                         # close group
                             """, re.X)
+    '''
 
     # if this is an article, consider using lowercase
     # detects titlecase within a reference
     reftitlecase = re.compile(r"""(\)\.\s*(?:[A-Z][^\s]*\s?)+(\.))""")
 
     # every period should be followed by a space
-    # remove URLs from file
+    # unmatched by URL patterns
     stopspace = re.compile(r"""((\w+)                 # context
                                (?!\b).\.[^ ,\n0-9)]   # match
                                (\w+))                 # context
                            """, re.X)
+    
     # multiple references should be combined with a semicolon
     joinrefstyle = re.compile(
-        r"\([^)]+(\b\d\d\d\d|n\.d\.)\)([\s+,;]*\([^)]+(\b\d\d\d\d|n\.d\.)\))+"
+        r"\([^)]+"+YEAR+"\)([\s+,;]*\([^)]+"+YEAR+"\))+"
     )
 
     # place the period after an in-text citation
-    refbeforedot = re.compile(r"(\.\s+\([^)]+(\b\d\d\d\d|n\.d\.)\))")
-
-    #if only the year is in brackets for an in-text citation, use "and" to
-    #separate author names
-    #intextciteand   = re.compile(r"""(.{0,5}           # context
-    #                                .{0,5})            # context
-    #                             """, re.X)
+    refbeforedot = re.compile(r"(\.\s+\([^)]+"+YEAR+"\))")
+   
+    # if only the year is in brackets for an in-text citation, use "and" to
+    # separate author names
+    # Hans & Yorke (2006) contradict ...
+    ampintextref = re.compile(r"[\w\s]+\s&\s[\w\s]+\("+YEAR+"\)")
 
     # if author names are in brackets for an in-text citation, use an & to
     # separate them
-    textciteamp = re.compile(r"(\([^)]+\sand\s[^)]+\s(\b\d\d\d\d|n\.d\.)\))")
-
+    # ... literature (Hans and Yorke, 2006).
+    andinbracketref = re.compile(r"\([^)]+\sand\s[^)]+\s"+YEAR+"\)")
+    
     # patterns to be exempted
     url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
                      + r"([\w.\b]*[\w\b])")
-    # Needs multiline in order to incorporate SoS (^) and EoS ($) in a text block
     email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", re.MULTILINE)
+
     
     # init ApaCheck object with an optional context length
     def __init__(self):
@@ -131,75 +135,80 @@ class ApaCheck:
         # find matches for each regexp
         matchList = list(re.finditer(self.yearletter, text))
         matchList += list(re.finditer(self.etalcomma, text))
-        matchList += list(re.finditer(self.refdatedot, text))
+        #matchList += list(re.finditer(self.refdatedot, text))
         matchList += list(re.finditer(self.reftitlecase, text))
         matchList += list(re.finditer(self.stopspace, text))
         matchList += list(re.finditer(self.joinrefstyle, text))
         matchList += list(re.finditer(self.refbeforedot, text))
+        matchList += list(re.finditer(self.ampintextref, text))
+        matchList += list(re.finditer(self.andinbracketref, text))
 
         unmatchList = list(re.finditer(self.url, text))
         unmatchList += list(re.finditer(self.email, text))
 
         # append to Match array
-        for i in range(len(matchList)):
+        for match in matchList:
             newMatch = ApaMatch()
-            newMatch.start = matchList[i].start()
-            newMatch.end = matchList[i].end()
+            newMatch.start = match.start()
+            newMatch.end = match.end()
             newMatch.target = text[newMatch.start:newMatch.end]
 
             suggestion = ""
 
-            if matchList[i].re == self.yearletter:
+            if match.re == self.yearletter:
                 newMatch.feedback = (u"Letters that appear immediately after a year should be lowercase.")
                 suggestion = newMatch.target.lower()
 
-            elif matchList[i].re == self.etalcomma:
+            elif match.re == self.etalcomma:
                 newMatch.feedback = (u"Do not put a comma before 'et al.'")
                 newMatch.see = "http://academicguides.waldenu.edu/writingcenter/apa/citations/etal"
                 suggestion = re.sub(r", ", " ", newMatch.target)
 
-            elif matchList[i].re == self.refdatedot:
-                newMatch.feedback = (u"References go at the end of sentences; end your sentence after the reference.")
-                s = newMatch.target
-                suggestion = re.sub(r"\)\s", r").", newMatch.target)
+                '''
+                elif match.re == self.refdatedot:
+                    newMatch.feedback = (u"References go at the end of sentences; end your sentence after the reference.")
+                    s = newMatch.target
+                    suggestion = re.sub(r"\)\s", r").", newMatch.target)
+                '''
 
-            elif matchList[i].re == self.reftitlecase:
+            elif match.re == self.reftitlecase:
                 newMatch.feedback = (u"If this is an article title, consider using lowercase.")
                 s = newMatch.target.lower()
                 s = s[4:]
                 suggestion = newMatch.target[:4]
                 suggestion += s
 
-            elif matchList[i].re == self.stopspace:
+            elif match.re == self.stopspace:
                 newMatch.feedback = (u"Every period should be followed by a space.")
                 suggestion = re.sub(r"\.", r". ", newMatch.target)
 
                 # double check that this isn't a false positive
-                for i in range(len(unmatchList)):
-                    unMatch = unmatchList[i]
+                for unMatch in unmatchList:
                     falsePositive = text[unMatch.start():unMatch.end()]
                     if re.search(newMatch.target, falsePositive):
                         newMatch = ""
                         suggestion = ""
                         break
 
-            elif matchList[i].re == self.joinrefstyle:
+            elif match.re == self.joinrefstyle:
                 newMatch.feedback = (u"Multiple parentheticals should be combined using a semicolon.")
                 newMatch.see = "http://www.apastyle.org/learn/faqs/references-in-parentheses.aspx"
                 suggestion = re.sub(r"\)[\s+,;]*\(", r"; ", newMatch.target)
 
-            elif matchList[i].re == self.refbeforedot:
+            elif match.re == self.refbeforedot:
                 newMatch.feedback = (u"In text citations belong as part of the preceeding sentence. Place the period after the citation.")
                 s = newMatch.target[:2]
                 suggestion = newMatch.target[2:]
                 suggestion += s
 
-            elif matchList[i].re == self.textciteamp:
-                print("Match")
-                newMatch.feedback = (u"Use & to separate bracketed author names.")
+            elif match.re == self.andinbracketref:
+                newMatch.feedback = (u"Use '&' to separate parenthesized author names.")
+                suggestion = re.sub(r"&", r"and", newMatch.target)
                 newMatch.see = "http://blog.apastyle.org/apastyle/2011/02/changes-parentheses-bring.html"
-                suggestion = re.sub(r"and", r"&", newMatch.target)
 
+            elif match.re == self.ampintextref:
+                newMatch.feedback = (u"Use 'and' to separate in-text author names.")
+                suggestion = re.sub(r"and", r"&", newMatch.target)
 
             if newMatch and suggestion:
                 newMatch.suggestions.append(suggestion)
