@@ -197,6 +197,7 @@ class ApaCheck:
             elif matchList[i].re == self.textciteamp:
                 print("Match")
                 newMatch.feedback = (u"Use & to separate bracketed author names.")
+                newMatch.see = "http://blog.apastyle.org/apastyle/2011/02/changes-parentheses-bring.html"
                 suggestion = re.sub(r"and", r"&", newMatch.target)
 
 
