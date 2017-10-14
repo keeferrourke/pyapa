@@ -95,11 +95,12 @@ class ApaCheck:
     reftitlecase = re.compile(r"""(\)\.\s*(?:[A-Z][^\s]*\s?)+(\.))""")
 
     # every period should be followed by a space
-    # remove URLs from file
+    # unmatched by URL patterns
     stopspace = re.compile(r"""((\w+)                 # context
                                (?!\b).\.[^ ,\n0-9)]   # match
                                (\w+))                 # context
                            """, re.X)
+    
     # multiple references should be combined with a semicolon
     joinrefstyle = re.compile(
         r"\([^)]+"+YEAR+"\)([\s+,;]*\([^)]+"+YEAR+"\))+"
@@ -107,19 +108,9 @@ class ApaCheck:
 
     # place the period after an in-text citation
     refbeforedot = re.compile(r"(\.\s+\([^)]+"+YEAR+"\))")
-
-    #if only the year is in brackets for an in-text citation, use "and" to
-    #separate author names
-    #intextciteand   = re.compile(r"""(.{0,5}           # context
-    #                                .{0,5})            # context
-    #                             """, re.X)
-
-    # patterns to be exempted
-    url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
-                     + r"([\w.\b]*[\w\b])")
-    # Needs multiline in order to incorporate SoS (^) and EoS ($) in a text block
-    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", re.MULTILINE)
-
+   
+    # if only the year is in brackets for an in-text citation, use "and" to
+    # separate author names
     # Hans & Yorke (2006) contradict ...
     ampintextref = re.compile(r"[\w\s]+\s&\s[\w\s]+\("+YEAR+"\)")
 
@@ -127,7 +118,13 @@ class ApaCheck:
     # separate them
     # ... literature (Hans and Yorke, 2006).
     andinbracketref = re.compile(r"\([^)]+\sand\s[^)]+\s"+YEAR+"\)")
+    
+    # patterns to be exempted
+    url = re.compile(r"(http|ftp|file|https)://([\w_-]+(?:(?:\.[\w_-]+)+))"
+                     + r"([\w.\b]*[\w\b])")
+    email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", re.MULTILINE)
 
+    
     # init ApaCheck object with an optional context length
     def __init__(self):
         self.Matches = []
@@ -164,6 +161,7 @@ class ApaCheck:
 
             elif match.re == self.etalcomma:
                 newMatch.feedback = (u"Do not put a comma before 'et al.'")
+                newMatch.see = "http://academicguides.waldenu.edu/writingcenter/apa/citations/etal"
                 suggestion = re.sub(r", ", " ", newMatch.target)
 
                 '''
@@ -204,11 +202,12 @@ class ApaCheck:
                 suggestion += s
 
             elif match.re == self.andinbracketref:
-                newMatch.feedback = (u"Use & to separate bracketed author names.")
+                newMatch.feedback = (u"Use '&' to separate parenthesized author names.")
                 suggestion = re.sub(r"&", r"and", newMatch.target)
+                newMatch.see = "http://blog.apastyle.org/apastyle/2011/02/changes-parentheses-bring.html"
 
             elif match.re == self.ampintextref:
-                newMatch.feedback = (u"Use and to separate in-text author names.")
+                newMatch.feedback = (u"Use 'and' to separate in-text author names.")
                 suggestion = re.sub(r"and", r"&", newMatch.target)
 
             if newMatch and suggestion:
